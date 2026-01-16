@@ -1,0 +1,48 @@
+# Environment variables (contains API keys)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database - INCLUDE in repo for Streamlit Cloud deployment
+# (Streamlit Cloud doesn't persist files, so we need to commit the db)
+
+# Large CSV source files (not needed after database is created)
+online_retail*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Claude Code settings
+.claude/
+
+# Temporary files
+*.tmp
+*.temp
