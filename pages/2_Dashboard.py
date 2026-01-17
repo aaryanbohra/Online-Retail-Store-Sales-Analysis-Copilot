@@ -128,9 +128,22 @@ def format_number(num, prefix=""):
         return f"{prefix}{num:.0f}"
 
 
-def create_metric_card(label, value, delta=None, delta_color="normal"):
-    """Create a styled metric"""
-    st.metric(label=label, value=value, delta=delta, delta_color=delta_color)
+def apply_chart_style(fig, height=350, xaxis_title="", yaxis_title="", **extra_layout):
+    """Apply consistent dark theme styling to Plotly charts"""
+    layout_config = {
+        'margin': dict(l=0, r=0, t=10, b=0),
+        'plot_bgcolor': 'rgba(0,0,0,0)',
+        'paper_bgcolor': 'rgba(0,0,0,0)',
+        'font_color': '#94a3b8',
+        'height': height,
+        'xaxis_title': xaxis_title,
+        'yaxis_title': yaxis_title,
+        **extra_layout
+    }
+    fig.update_layout(**layout_config)
+    fig.update_xaxes(color='#94a3b8')
+    fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+    return fig
 
 
 # Load data
@@ -196,15 +209,15 @@ st.markdown("### Key Metrics")
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    create_metric_card("Total Revenue", format_number(stats['total_revenue'], "£"))
+    st.metric("Total Revenue", format_number(stats['total_revenue'], "£"))
 with col2:
-    create_metric_card("Orders", format_number(stats['total_orders']))
+    st.metric("Orders", format_number(stats['total_orders']))
 with col3:
-    create_metric_card("Customers", format_number(stats['total_customers']))
+    st.metric("Customers", format_number(stats['total_customers']))
 with col4:
-    create_metric_card("Avg Order Value", f"£{stats['avg_order_value']:.2f}")
+    st.metric("Avg Order Value", f"£{stats['avg_order_value']:.2f}")
 with col5:
-    create_metric_card("Countries", str(stats['total_countries']))
+    st.metric("Countries", str(stats['total_countries']))
 
 st.markdown("")
 
@@ -227,22 +240,9 @@ with tab1:
             y='revenue',
             color_discrete_sequence=['#667eea']
         )
-        fig.update_traces(
-            line=dict(width=2),
-            fillcolor='rgba(102, 126, 234, 0.3)'
-        )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="",
-            yaxis_title="Revenue (£)",
-            hovermode='x unified',
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=350,
-            font_color='#94a3b8'
-        )
-        fig.update_xaxes(showgrid=False, tickangle=45, color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        fig.update_traces(line=dict(width=2), fillcolor='rgba(102, 126, 234, 0.3)')
+        apply_chart_style(fig, yaxis_title="Revenue (£)", hovermode='x unified')
+        fig.update_xaxes(showgrid=False, tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -256,17 +256,8 @@ with tab1:
             y='revenue',
             color_discrete_sequence=['#764ba2']
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="",
-            yaxis_title="Revenue (£)",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=350,
-            font_color='#94a3b8'
-        )
-        fig.update_xaxes(showgrid=False, color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        apply_chart_style(fig, yaxis_title="Revenue (£)")
+        fig.update_xaxes(showgrid=False)
         st.plotly_chart(fig, use_container_width=True)
 
     # Second row
@@ -287,19 +278,7 @@ with tab1:
             color='revenue',
             color_continuous_scale='Purples'
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="",
-            yaxis_title="Revenue (£)",
-            showlegend=False,
-            coloraxis_showscale=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=300,
-            font_color='#94a3b8'
-        )
-        fig.update_xaxes(color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        apply_chart_style(fig, height=300, yaxis_title="Revenue (£)", showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -314,21 +293,9 @@ with tab1:
             markers=True,
             color_discrete_sequence=['#667eea']
         )
-        fig.update_traces(
-            line=dict(width=3),
-            marker=dict(size=8)
-        )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Hour",
-            yaxis_title="Revenue (£)",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=300,
-            font_color='#94a3b8'
-        )
-        fig.update_xaxes(showgrid=False, dtick=2, color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        fig.update_traces(line=dict(width=3), marker=dict(size=8))
+        apply_chart_style(fig, height=300, xaxis_title="Hour", yaxis_title="Revenue (£)")
+        fig.update_xaxes(showgrid=False, dtick=2)
         st.plotly_chart(fig, use_container_width=True)
 
 # ----- TAB 2: GEOGRAPHIC -----
@@ -355,20 +322,11 @@ with tab2:
             color_continuous_scale='Purples',
             hover_data=['orders', 'customers']
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Revenue (£)",
-            yaxis_title="",
-            showlegend=False,
-            coloraxis_showscale=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=400,
-            yaxis={'categoryorder': 'total ascending'},
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=400, xaxis_title="Revenue (£)",
+            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
-        fig.update_yaxes(color='#94a3b8')
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -391,12 +349,9 @@ with tab2:
             color_discrete_sequence=px.colors.sequential.Purples_r,
             hole=0.4
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.2, font=dict(color='#94a3b8')),
-            height=400,
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=400,
+            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, font=dict(color='#94a3b8'))
         )
         fig.update_traces(textposition='inside', textinfo='percent+label', textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
@@ -441,20 +396,11 @@ with tab3:
             color='revenue',
             color_continuous_scale='Purples'
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Revenue (£)",
-            yaxis_title="",
-            showlegend=False,
-            coloraxis_showscale=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=400,
-            yaxis={'categoryorder': 'total ascending'},
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=400, xaxis_title="Revenue (£)",
+            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
-        fig.update_yaxes(color='#94a3b8')
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -472,20 +418,11 @@ with tab3:
             color='quantity',
             color_continuous_scale='Greens'
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Units Sold",
-            yaxis_title="",
-            showlegend=False,
-            coloraxis_showscale=False,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=400,
-            yaxis={'categoryorder': 'total ascending'},
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=400, xaxis_title="Units Sold",
+            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
-        fig.update_yaxes(color='#94a3b8')
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
         st.plotly_chart(fig, use_container_width=True)
 
     # Product price tier analysis
@@ -514,18 +451,11 @@ with tab3:
             color_continuous_scale='Greens',
             hover_data={'units_sold': ':,', 'products': True}
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Price Tier",
-            yaxis_title="Revenue (£)",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=250,
-            font_color='#94a3b8',
+        apply_chart_style(
+            fig, height=250, xaxis_title="Price Tier", yaxis_title="Revenue (£)",
             coloraxis_showscale=False
         )
-        fig.update_xaxes(showgrid=False, color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        fig.update_xaxes(showgrid=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
@@ -537,12 +467,9 @@ with tab3:
             color_discrete_sequence=px.colors.sequential.Greens_r,
             hole=0.4
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8')),
-            height=250,
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=250,
+            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
         )
         fig.update_traces(textposition='inside', textinfo='percent', textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
@@ -573,21 +500,13 @@ with tab4:
             hover_data={'revenue_formatted': True, 'orders': True, 'revenue': False, 'customer_label': False},
             labels={'revenue_formatted': 'Revenue', 'orders': 'Orders'}
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Revenue (£)",
-            yaxis_title="",
-            showlegend=False,
-            coloraxis_showscale=True,
+        apply_chart_style(
+            fig, height=400, xaxis_title="Revenue (£)",
+            showlegend=False, coloraxis_showscale=True,
             coloraxis_colorbar=dict(title="Orders", tickfont=dict(color='#94a3b8'), title_font=dict(color='#94a3b8')),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=400,
-            yaxis={'categoryorder': 'total ascending'},
-            font_color='#94a3b8'
+            yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8', type='log', dtick=1)
-        fig.update_yaxes(color='#94a3b8')
+        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', type='log', dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -610,12 +529,9 @@ with tab4:
             color_discrete_sequence=px.colors.sequential.Blues_r,
             hole=0.4
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8')),
-            height=400,
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=400,
+            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
         )
         fig.update_traces(textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
@@ -648,18 +564,11 @@ with tab4:
             color_continuous_scale='Purples',
             hover_data={'total_revenue': ':,.0f', 'avg_revenue': ':,.0f'}
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="Value Segment",
-            yaxis_title="Number of Customers",
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=280,
-            font_color='#94a3b8',
+        apply_chart_style(
+            fig, height=280, xaxis_title="Value Segment", yaxis_title="Number of Customers",
             coloraxis_showscale=False
         )
-        fig.update_xaxes(showgrid=False, color='#94a3b8')
-        fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+        fig.update_xaxes(showgrid=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
@@ -670,12 +579,9 @@ with tab4:
             color_discrete_sequence=px.colors.sequential.Purples_r,
             hole=0.4
         )
-        fig.update_layout(
-            margin=dict(l=0, r=0, t=10, b=0),
-            showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8')),
-            height=280,
-            font_color='#94a3b8'
+        apply_chart_style(
+            fig, height=280,
+            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
         )
         fig.update_traces(textposition='inside', textinfo='percent', textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
