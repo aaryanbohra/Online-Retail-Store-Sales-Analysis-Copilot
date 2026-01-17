@@ -94,6 +94,10 @@ Rules:
     - "monthly trend" or "trend by month" = GROUP BY month (strftime('%Y-%m')) to show month-by-month data
     - "trend over/during/in [year]" = GROUP BY month to show monthly data within that year
     - Always match the granularity to what makes sense for visualization (multiple data points for trends)
+12. CRITICAL for window functions (LAG, LEAD, ROW_NUMBER, etc.):
+    - SQLite cannot use column aliases in window function ORDER BY clauses in the same SELECT
+    - ALWAYS wrap the base query in a subquery first, then apply window functions in the outer query
+    - GROUP BY must use the full expression (e.g., strftime('%Y-%m-%d', o.invoice_date)), not the alias
 
 Common query patterns:
 
@@ -101,7 +105,17 @@ Common query patterns:
   SELECT strftime('%Y-%m-%d', o.invoice_date) AS date, SUM(oi.revenue) AS daily_revenue
   FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
   WHERE strftime('%Y-%m', o.invoice_date) = '2011-01'
-  GROUP BY date ORDER BY date
+  GROUP BY strftime('%Y-%m-%d', o.invoice_date) ORDER BY date
+
+- Daily revenue GROWTH trend (with percentage change) - MUST use subquery:
+  SELECT date, daily_revenue,
+    ROUND((daily_revenue - LAG(daily_revenue, 1) OVER (ORDER BY date)) * 100.0 / LAG(daily_revenue, 1) OVER (ORDER BY date), 2) AS growth_pct
+  FROM (
+    SELECT strftime('%Y-%m-%d', o.invoice_date) AS date, SUM(oi.revenue) AS daily_revenue
+    FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+    WHERE strftime('%Y-%m', o.invoice_date) = '2011-01'
+    GROUP BY strftime('%Y-%m-%d', o.invoice_date)
+  ) ORDER BY date
 
 - Revenue by date:
   SELECT ... FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
