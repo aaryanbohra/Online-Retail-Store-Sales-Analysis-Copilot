@@ -529,6 +529,7 @@ with tab3:
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
+        st.markdown('<p class="chart-title">📦 Units Sold by Price Tier</p>', unsafe_allow_html=True)
         fig = px.pie(
             price_summary,
             values='units_sold',
@@ -541,8 +542,7 @@ with tab3:
             showlegend=True,
             legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8')),
             height=250,
-            font_color='#94a3b8',
-            title=dict(text="Units Sold by Price Tier", font=dict(size=12, color='#a5b4fc'), x=0.5)
+            font_color='#94a3b8'
         )
         fig.update_traces(textposition='inside', textinfo='percent', textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
