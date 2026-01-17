@@ -579,7 +579,7 @@ with tab4:
             yaxis_title="",
             showlegend=False,
             coloraxis_showscale=True,
-            coloraxis_colorbar=dict(title="Orders", tickfont=dict(color='#94a3b8'), titlefont=dict(color='#94a3b8')),
+            coloraxis_colorbar=dict(title="Orders", tickfont=dict(color='#94a3b8'), title_font=dict(color='#94a3b8')),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             height=400,
