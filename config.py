@@ -70,6 +70,12 @@ CRITICAL column locations:
 - invoice_date → orders table ONLY
 - customer_id → both customers and orders tables
 - country → both customers and orders tables
+
+IMPORTANT country name mappings (use the database value, not common names):
+- Ireland = 'EIRE'
+- South Africa = 'RSA'
+- United States / America = 'USA'
+- UK / Britain = 'United Kingdom'
 """
 
 # System Prompts
