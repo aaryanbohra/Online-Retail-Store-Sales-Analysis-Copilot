@@ -6,7 +6,7 @@ Multi-page Streamlit application for sales analytics
 import streamlit as st
 
 st.set_page_config(
-    page_title="Online Retail Store Sales Analysis",
+    page_title="Analytics Copilot",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -129,7 +129,7 @@ with st.sidebar:
     st.markdown("- **Dashboard**: Interactive visual analytics")
 
 # Main content
-st.markdown('<p class="main-header">Analytics Copilot</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-header">Online Retail Store Sales Analysis</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">AI-powered business intelligence for your sales data</p>', unsafe_allow_html=True)
 
 # Dataset overview
