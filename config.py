@@ -94,10 +94,12 @@ Rules:
     - "monthly trend" or "trend by month" = GROUP BY month (strftime('%Y-%m')) to show month-by-month data
     - "trend over/during/in [year]" = GROUP BY month to show monthly data within that year
     - Always match the granularity to what makes sense for visualization (multiple data points for trends)
-12. CRITICAL for window functions (LAG, LEAD, ROW_NUMBER, etc.):
+12. CRITICAL for window functions (LAG, LEAD, ROW_NUMBER, RANK, etc.):
     - SQLite cannot use column aliases in window function ORDER BY clauses in the same SELECT
-    - ALWAYS wrap the base query in a subquery first, then apply window functions in the outer query
+    - SQLite cannot use window functions in HAVING clause - MUST use subquery
+    - ALWAYS wrap the base query in a subquery first, then apply window functions OR filter by window result in outer query
     - GROUP BY must use the full expression (e.g., strftime('%Y-%m-%d', o.invoice_date)), not the alias
+    - For "top N per group" queries: calculate ROW_NUMBER() in subquery, filter WHERE rn <= N in outer query
 
 Common query patterns:
 
@@ -125,18 +127,16 @@ Common query patterns:
   SELECT o.country, SUM(oi.revenue) FROM order_items oi
   JOIN orders o ON oi.invoice_id = o.invoice_id GROUP BY o.country
 
-- Top N per group (e.g., highest month per year):
-  SELECT year, month, revenue FROM (
-    SELECT year, month, revenue, ROW_NUMBER() OVER (PARTITION BY year ORDER BY revenue DESC) as rn
-    FROM (
-      SELECT strftime('%Y', o.invoice_date) AS year,
-             strftime('%Y-%m', o.invoice_date) AS month,
-             SUM(oi.revenue) AS revenue
-      FROM order_items oi
-      JOIN orders o ON oi.invoice_id = o.invoice_id
-      GROUP BY year, month
-    )
-  ) WHERE rn = 1
+- Top N per group (e.g., top 3 customers per country):
+  SELECT country, customer_id, total_revenue FROM (
+    SELECT c.country, c.customer_id, SUM(oi.revenue) AS total_revenue,
+           ROW_NUMBER() OVER (PARTITION BY c.country ORDER BY SUM(oi.revenue) DESC) AS rn
+    FROM order_items oi
+    JOIN orders o ON oi.invoice_id = o.invoice_id
+    JOIN customers c ON o.customer_id = c.customer_id
+    GROUP BY c.country, c.customer_id
+  ) WHERE rn <= 3
+  ORDER BY country, total_revenue DESC
 
 - Average monthly revenue per year:
   SELECT year, AVG(monthly_revenue) as avg_monthly_revenue FROM (
