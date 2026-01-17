@@ -89,8 +89,19 @@ Rules:
 8. Ensure the query is complete and valid - check for proper syntax including all parentheses and keywords.
 9. CRITICAL: Always reference revenue from order_items table (e.g., order_items.revenue or oi.revenue). Never use orders.revenue as it does not exist.
 10. CRITICAL: Always reference invoice_date from orders table (e.g., orders.invoice_date or o.invoice_date). Never use order_items.invoice_date as it does not exist.
+11. CRITICAL for time granularity:
+    - "trend over/during/in [month]" or "daily trend in [month]" = GROUP BY day (strftime('%Y-%m-%d')) to show daily data within that month
+    - "monthly trend" or "trend by month" = GROUP BY month (strftime('%Y-%m')) to show month-by-month data
+    - "trend over/during/in [year]" = GROUP BY month to show monthly data within that year
+    - Always match the granularity to what makes sense for visualization (multiple data points for trends)
 
 Common query patterns:
+
+- Daily revenue trend within a specific month (e.g., January 2011):
+  SELECT strftime('%Y-%m-%d', o.invoice_date) AS date, SUM(oi.revenue) AS daily_revenue
+  FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+  WHERE strftime('%Y-%m', o.invoice_date) = '2011-01'
+  GROUP BY date ORDER BY date
 
 - Revenue by date:
   SELECT ... FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
