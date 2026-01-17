@@ -77,6 +77,46 @@ st.markdown("""
         color: #94a3b8;
         font-size: 0.85rem;
     }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .data-table th {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        color: #a5b4fc;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #4f46e5;
+    }
+
+    .data-table td {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid rgba(129, 140, 248, 0.15);
+        color: #cbd5e1;
+    }
+
+    .data-table tr:hover {
+        background: rgba(129, 140, 248, 0.08);
+    }
+
+    .data-table code {
+        background: rgba(129, 140, 248, 0.2);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #a5b4fc;
+    }
+
+    .source-note {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -131,6 +171,50 @@ with col4:
     """, unsafe_allow_html=True)
 
 st.markdown("")
+
+# Original Dataset Schema
+with st.expander("📋 Original Dataset Variables", expanded=False):
+    st.markdown("""
+    <p class="source-note">Source: UCI Machine Learning Repository - Online Retail II Dataset</p>
+    <table class="data-table">
+        <tr>
+            <th>Variable</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td><code>InvoiceNo</code></td>
+            <td>6-digit invoice number. Prefix <code>C</code> indicates a cancellation.</td>
+        </tr>
+        <tr>
+            <td><code>StockCode</code></td>
+            <td>5-digit product/item code uniquely assigned to each product.</td>
+        </tr>
+        <tr>
+            <td><code>Description</code></td>
+            <td>Product name/description.</td>
+        </tr>
+        <tr>
+            <td><code>Quantity</code></td>
+            <td>Quantity of each product per transaction. Negative values indicate returns.</td>
+        </tr>
+        <tr>
+            <td><code>InvoiceDate</code></td>
+            <td>Date and time when the transaction was generated.</td>
+        </tr>
+        <tr>
+            <td><code>UnitPrice</code></td>
+            <td>Product price per unit in GBP (£).</td>
+        </tr>
+        <tr>
+            <td><code>CustomerID</code></td>
+            <td>5-digit unique customer identifier.</td>
+        </tr>
+        <tr>
+            <td><code>Country</code></td>
+            <td>Country where the customer resides.</td>
+        </tr>
+    </table>
+    """, unsafe_allow_html=True)
 
 # Feature cards
 st.subheader("Features")
