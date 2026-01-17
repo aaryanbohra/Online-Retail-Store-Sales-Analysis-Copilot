@@ -129,7 +129,11 @@ with st.sidebar:
     st.markdown("- **Dashboard**: Interactive visual analytics")
 
 # Main content
-st.markdown('<p class="main-header">Online Retail Store Sales Analysis</p>', unsafe_allow_html=True)
+st.markdown("""
+<h1 style="font-size: 3.5rem; font-weight: 700; background: linear-gradient(90deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem;">
+    Online Retail Store Sales Analysis
+</h1>
+""", unsafe_allow_html=True)
 st.markdown('<p class="sub-header">AI-powered business intelligence for your sales data</p>', unsafe_allow_html=True)
 
 # Dataset overview
