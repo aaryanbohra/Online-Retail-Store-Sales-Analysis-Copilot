@@ -6,7 +6,7 @@ Multi-page Streamlit application for sales analytics
 import streamlit as st
 
 st.set_page_config(
-    page_title="Analytics Copilot",
+    page_title="Online Retail Store Sales Analysis",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
