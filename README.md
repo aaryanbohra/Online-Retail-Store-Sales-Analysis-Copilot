@@ -2,9 +2,12 @@
 
 An AI-powered business intelligence tool that lets you query your sales data using natural language. Built with Streamlit and Claude AI.
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://online-retail-store-sales-analysis-copilot.streamlit.app/)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.31-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+**[Try the Live Demo](https://online-retail-store-sales-analysis-copilot.streamlit.app/)**
 
 ## Overview
 
@@ -103,6 +106,7 @@ Navigate using the sidebar:
 - **Home**: Overview and getting started
 - **Copilot**: AI-powered natural language queries
 - **Dashboard**: Interactive analytics dashboard
+- **Dataset**: Browse the original dataset
 
 ## Project Structure
 
@@ -111,7 +115,8 @@ Sales Analysis/
 ├── Home.py                # Main entry point (multi-page app)
 ├── pages/
 │   ├── 1_Copilot.py       # AI Copilot page
-│   └── 2_Dashboard.py     # Analytics dashboard page
+│   ├── 2_Dashboard.py     # Analytics dashboard page
+│   └── 3_Dataset.py       # Original dataset viewer
 ├── config.py              # Configuration and prompts
 ├── setup_database.py      # Database initialization script
 ├── analytics.db           # SQLite database
