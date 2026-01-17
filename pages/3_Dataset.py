@@ -1,4 +1,4 @@
-"""Dataset Page - View and explore the original dataset"""
+"""Dataset Page - View the original dataset in its original format"""
 
 import streamlit as st
 import sqlite3
@@ -6,7 +6,7 @@ import pandas as pd
 from config import DATABASE_PATH
 
 # Page config
-st.set_page_config(page_title="Dataset Explorer", page_icon="📋", layout="wide")
+st.set_page_config(page_title="Original Dataset", page_icon="📋", layout="wide")
 
 # Custom CSS
 st.markdown("""
@@ -45,36 +45,6 @@ st.markdown("""
         margin-top: 0.25rem;
     }
 
-    /* Table section */
-    .table-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #a5b4fc;
-        margin-bottom: 0.5rem;
-        padding-top: 0.5rem;
-    }
-
-    /* Schema card */
-    .schema-card {
-        background: rgba(30, 27, 75, 0.5);
-        border-radius: 8px;
-        padding: 1rem;
-        border: 1px solid rgba(129, 140, 248, 0.2);
-        margin-bottom: 0.5rem;
-    }
-
-    .schema-table {
-        color: #818cf8;
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-
-    .schema-cols {
-        color: #94a3b8;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -82,20 +52,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 @st.cache_data(ttl=600)
-def get_table_stats():
-    """Get statistics for each table"""
+def get_dataset_stats():
+    """Get statistics for the dataset"""
     conn = sqlite3.connect(DATABASE_PATH)
 
     stats = {}
 
-    # Customers
-    stats['customers'] = pd.read_sql_query("SELECT COUNT(*) as count FROM customers", conn).iloc[0, 0]
-
-    # Orders
-    stats['orders'] = pd.read_sql_query("SELECT COUNT(*) as count FROM orders", conn).iloc[0, 0]
-
-    # Order items
-    stats['order_items'] = pd.read_sql_query("SELECT COUNT(*) as count FROM order_items", conn).iloc[0, 0]
+    # Total records
+    stats['records'] = pd.read_sql_query("SELECT COUNT(*) as count FROM order_items", conn).iloc[0, 0]
 
     # Date range
     dates = pd.read_sql_query("SELECT MIN(invoice_date) as min_date, MAX(invoice_date) as max_date FROM orders", conn)
@@ -108,45 +72,78 @@ def get_table_stats():
     # Products
     stats['products'] = pd.read_sql_query("SELECT COUNT(DISTINCT stock_code) as count FROM order_items", conn).iloc[0, 0]
 
+    # Customers
+    stats['customers'] = pd.read_sql_query("SELECT COUNT(DISTINCT customer_id) as count FROM customers", conn).iloc[0, 0]
+
     conn.close()
     return stats
 
 @st.cache_data(ttl=600)
-def load_sample_data(table: str, limit: int = 100):
-    """Load sample data from a table"""
+def load_original_dataset(limit: int = 100):
+    """Load data in original dataset format by joining tables"""
     conn = sqlite3.connect(DATABASE_PATH)
-    df = pd.read_sql_query(f"SELECT * FROM {table} LIMIT {limit}", conn)
+
+    query = f"""
+    SELECT
+        o.invoice_id AS InvoiceNo,
+        oi.stock_code AS StockCode,
+        oi.description AS Description,
+        oi.quantity AS Quantity,
+        o.invoice_date AS InvoiceDate,
+        oi.unit_price AS UnitPrice,
+        o.customer_id AS CustomerID,
+        o.country AS Country
+    FROM order_items oi
+    JOIN orders o ON oi.invoice_id = o.invoice_id
+    ORDER BY o.invoice_date DESC
+    LIMIT {limit}
+    """
+
+    df = pd.read_sql_query(query, conn)
     conn.close()
     return df
 
 # Sidebar
 with st.sidebar:
-    st.markdown("### 📋 Dataset Explorer")
-    st.caption("Browse the database tables")
+    st.markdown("### 📋 Original Dataset")
+    st.caption("View the dataset in its original format")
     st.divider()
 
-    st.markdown("**Tables**")
-    st.markdown("- `customers` - Customer info")
-    st.markdown("- `orders` - Order headers")
-    st.markdown("- `order_items` - Order line items")
+    st.markdown("**Variables**")
+    st.markdown("- `InvoiceNo` - Invoice number")
+    st.markdown("- `StockCode` - Product code")
+    st.markdown("- `Description` - Product name")
+    st.markdown("- `Quantity` - Items ordered")
+    st.markdown("- `InvoiceDate` - Transaction date")
+    st.markdown("- `UnitPrice` - Price per unit")
+    st.markdown("- `CustomerID` - Customer ID")
+    st.markdown("- `Country` - Customer country")
 
     st.divider()
-    st.markdown("**Original Source**")
+    st.markdown("**Source**")
     st.caption("UCI Machine Learning Repository")
     st.caption("Online Retail II Dataset")
 
 # Header
-st.markdown("# 📋 Dataset Explorer")
-st.markdown("Browse and explore the underlying database tables")
+st.markdown("# 📋 Original Dataset")
+st.markdown("View the dataset in its original format as provided by UCI Machine Learning Repository")
 
 # Stats
-stats = get_table_stats()
+stats = get_dataset_stats()
 
-st.markdown("### Database Overview")
+st.markdown("### Dataset Overview")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
+    st.markdown(f"""
+    <div class="stats-card">
+        <div class="stats-number">{stats['records']:,}</div>
+        <div class="stats-label">Records</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
     st.markdown(f"""
     <div class="stats-card">
         <div class="stats-number">{stats['customers']:,}</div>
@@ -154,19 +151,11 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
-    st.markdown(f"""
-    <div class="stats-card">
-        <div class="stats-number">{stats['orders']:,}</div>
-        <div class="stats-label">Orders</div>
-    </div>
-    """, unsafe_allow_html=True)
-
 with col3:
     st.markdown(f"""
     <div class="stats-card">
-        <div class="stats-number">{stats['order_items']:,}</div>
-        <div class="stats-label">Order Items</div>
+        <div class="stats-number">{stats['products']:,}</div>
+        <div class="stats-label">Products</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -181,127 +170,53 @@ with col4:
 with col5:
     st.markdown(f"""
     <div class="stats-card">
-        <div class="stats-number">{stats['products']:,}</div>
-        <div class="stats-label">Products</div>
+        <div class="stats-number">{stats['min_date'][:4]}–{stats['max_date'][:4]}</div>
+        <div class="stats-label">Time Period</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("")
 
-# Schema overview
-st.markdown("### Database Schema")
+# Variable descriptions
+st.markdown("### Variable Descriptions")
 
-col1, col2, col3 = st.columns(3)
+st.markdown("""
+| Variable | Description |
+|----------|-------------|
+| **InvoiceNo** | 6-digit invoice number. Prefix `C` indicates a cancellation. |
+| **StockCode** | 5-digit product/item code uniquely assigned to each product. |
+| **Description** | Product name/description. |
+| **Quantity** | Quantity of each product per transaction. Negative values indicate returns. |
+| **InvoiceDate** | Date and time when the transaction was generated. |
+| **UnitPrice** | Product price per unit in GBP. |
+| **CustomerID** | 5-digit unique customer identifier. |
+| **Country** | Country where the customer resides. |
+""")
 
-with col1:
-    st.markdown("""
-    <div class="schema-card">
-        <div class="schema-table">customers</div>
-        <div class="schema-cols">
-            • customer_id (PK)<br>
-            • country
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("")
 
+# Data browser
+st.markdown("### Browse Dataset")
+
+col1, col2 = st.columns([3, 1])
 with col2:
-    st.markdown("""
-    <div class="schema-card">
-        <div class="schema-table">orders</div>
-        <div class="schema-cols">
-            • invoice_id (PK)<br>
-            • invoice_date<br>
-            • customer_id (FK)<br>
-            • country
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    limit = st.selectbox("Rows to display", [50, 100, 500, 1000, 5000], index=1)
 
-with col3:
-    st.markdown("""
-    <div class="schema-card">
-        <div class="schema-table">order_items</div>
-        <div class="schema-cols">
-            • order_item_id (PK)<br>
-            • invoice_id (FK)<br>
-            • stock_code, description<br>
-            • quantity, unit_price, revenue
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+df = load_original_dataset(limit)
+st.dataframe(df, use_container_width=True, hide_index=True)
 
-st.markdown("")
+st.download_button(
+    "Download CSV",
+    df.to_csv(index=False),
+    "online_retail_dataset.csv",
+    "text/csv"
+)
 
-# Table browser
-st.markdown("### Browse Tables")
-
-tab1, tab2, tab3 = st.tabs(["👥 Customers", "🧾 Orders", "📦 Order Items"])
-
-with tab1:
-    st.markdown('<p class="table-title">Customers Table</p>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        limit1 = st.selectbox("Rows", [50, 100, 500, 1000], index=1, key="cust_limit")
-
-    df_customers = load_sample_data("customers", limit1)
-    st.dataframe(df_customers, use_container_width=True, hide_index=True)
-
-    st.download_button(
-        "Download CSV",
-        df_customers.to_csv(index=False),
-        "customers.csv",
-        "text/csv"
-    )
-
-with tab2:
-    st.markdown('<p class="table-title">Orders Table</p>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        limit2 = st.selectbox("Rows", [50, 100, 500, 1000], index=1, key="orders_limit")
-
-    df_orders = load_sample_data("orders", limit2)
-    st.dataframe(df_orders, use_container_width=True, hide_index=True)
-
-    st.download_button(
-        "Download CSV",
-        df_orders.to_csv(index=False),
-        "orders.csv",
-        "text/csv"
-    )
-
-with tab3:
-    st.markdown('<p class="table-title">Order Items Table</p>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        limit3 = st.selectbox("Rows", [50, 100, 500, 1000], index=1, key="items_limit")
-
-    df_items = load_sample_data("order_items", limit3)
-    st.dataframe(df_items, use_container_width=True, hide_index=True)
-
-    st.download_button(
-        "Download CSV",
-        df_items.to_csv(index=False),
-        "order_items.csv",
-        "text/csv"
-    )
-
-# Original variables reference
+# Footer
 st.markdown("---")
-with st.expander("📖 Original Dataset Variables Reference"):
-    st.markdown("""
-    | Variable | Description |
-    |----------|-------------|
-    | **InvoiceNo** | 6-digit invoice number. Prefix `C` indicates a cancellation. |
-    | **StockCode** | 5-digit product/item code uniquely assigned to each product. |
-    | **Description** | Product name/description. |
-    | **Quantity** | Quantity of each product per transaction. Negative = returns. |
-    | **InvoiceDate** | Date and time when the transaction was generated. |
-    | **UnitPrice** | Product price per unit in GBP (£). |
-    | **CustomerID** | 5-digit unique customer identifier. |
-    | **Country** | Country where the customer resides. |
-
-    *Source: [UCI Machine Learning Repository - Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii)*
-    """)
+st.markdown(
+    '<p style="color: #64748b; font-size: 0.85rem;">'
+    'Source: <a href="https://archive.ics.uci.edu/dataset/502/online+retail+ii" style="color: #818cf8;">UCI Machine Learning Repository - Online Retail II</a>'
+    '</p>',
+    unsafe_allow_html=True
+)
