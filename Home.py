@@ -1,294 +1,206 @@
-"""
-Analytics Copilot - Home Page
-Multi-page Streamlit application for sales analytics
-"""
-
 import streamlit as st
+from utils.theme import (
+    init_theme, get_theme_colors,
+    get_global_css, get_hero_css, get_card_css,
+    get_section_css, get_table_css
+)
 
 st.set_page_config(
     page_title="Analytics Copilot",
-    page_icon="📊",
+    page_icon="//",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for dark theme
-st.markdown("""
-<style>
-    /* Dark sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
-    }
-    [data-testid="stSidebar"] * {
-        color: #e2e8f0 !important;
-    }
+init_theme()
+st.markdown(get_global_css(), unsafe_allow_html=True)
+st.markdown(get_hero_css(), unsafe_allow_html=True)
+st.markdown(get_card_css(), unsafe_allow_html=True)
+st.markdown(get_section_css(), unsafe_allow_html=True)
+st.markdown(get_table_css(), unsafe_allow_html=True)
 
-    /* Main content styling */
-    .main-header {
-        font-size: 5rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #818cf8, #a78bfa);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
+c = get_theme_colors()
 
-    .sub-header {
-        font-size: 1.25rem;
-        color: #94a3b8;
-        margin-bottom: 2rem;
-    }
-
-    .feature-card {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(129, 140, 248, 0.3);
-    }
-
-    .feature-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #818cf8;
-        margin-bottom: 0.5rem;
-    }
-
-    .feature-desc {
-        color: #cbd5e1;
-        font-size: 0.95rem;
-    }
-
-    .stat-box {
-        background: rgba(30, 27, 75, 0.5);
-        border-radius: 8px;
-        padding: 1rem;
-        text-align: center;
-        border: 1px solid rgba(129, 140, 248, 0.2);
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #818cf8;
-    }
-
-    .stat-label {
-        color: #94a3b8;
-        font-size: 0.85rem;
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-    }
-
-    .data-table th {
-        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-        color: #a5b4fc;
-        padding: 0.75rem 1rem;
-        text-align: left;
-        font-weight: 600;
-        border-bottom: 2px solid #4f46e5;
-    }
-
-    .data-table td {
-        padding: 0.6rem 1rem;
-        border-bottom: 1px solid rgba(129, 140, 248, 0.15);
-        color: #cbd5e1;
-    }
-
-    .data-table tr:hover {
-        background: rgba(129, 140, 248, 0.08);
-    }
-
-    .data-table code {
-        background: rgba(129, 140, 248, 0.2);
-        padding: 0.15rem 0.4rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        color: #a5b4fc;
-    }
-
-    .source-note {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-top: 0.5rem;
-        font-style: italic;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Sidebar
 with st.sidebar:
-    st.markdown("### Navigation")
-    st.markdown("Use the sidebar to navigate between pages:")
-    st.markdown("- **Home**: Overview and getting started")
-    st.markdown("- **Copilot**: Ask questions in natural language")
-    st.markdown("- **Dashboard**: Interactive visual analytics")
+    st.markdown("### // NAVIGATION")
+    st.markdown("")
+    st.markdown(f"""
+    <p style="color: {c['text_tertiary']}; font-size: 0.85rem; line-height: 1.8;">
+    <span style="color: {c['accent_primary']};">01</span> &nbsp;Home<br>
+    <span style="color: {c['accent_primary']};">02</span> &nbsp;AI Copilot<br>
+    <span style="color: {c['accent_primary']};">03</span> &nbsp;Dashboard<br>
+    <span style="color: {c['accent_primary']};">04</span> &nbsp;Dataset
+    </p>
+    """, unsafe_allow_html=True)
 
-# Main content
-st.markdown("""
-<h1 style="font-size: 3.5rem; font-weight: 700; background: linear-gradient(90deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem;">
-    Online Retail Store Sales Analysis
-</h1>
+    st.divider()
+
+    st.markdown(f"""
+    <p style="color: {c['text_tertiary']}; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace;">
+    SYSTEM STATUS<br>
+    <span style="color: {c['success']};">●</span> Database connected<br>
+    <span style="color: {c['success']};">●</span> AI model ready
+    </p>
+    """, unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="hero-container">
+    <div class="hero-badge">ANALYTICS PLATFORM v2.0</div>
+    <h1 class="hero-title">
+        Online Retail<br>
+        <span class="accent">Sales Analysis</span>
+    </h1>
+    <p class="hero-subtitle">
+        AI-powered business intelligence platform. Query your data with natural language,
+        visualize trends, and uncover insights in real-time.
+    </p>
+    <div class="hero-line"></div>
+</div>
 """, unsafe_allow_html=True)
-st.markdown('<p class="sub-header">AI-powered business intelligence for your sales data</p>', unsafe_allow_html=True)
 
-# Dataset overview
-st.markdown("---")
-st.subheader("Dataset Overview")
-
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.markdown("""
-    <div class="stat-box">
-        <div class="stat-number">1M+</div>
+st.markdown("""
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="stat-icon">&#x1F4CA;</span>
+        <div class="stat-value">1M+</div>
         <div class="stat-label">Transactions</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-    <div class="stat-box">
-        <div class="stat-number">2009-2011</div>
+    <div class="stat-card">
+        <span class="stat-icon">&#x1F4C5;</span>
+        <div class="stat-value">2009-11</div>
         <div class="stat-label">Time Period</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown("""
-    <div class="stat-box">
-        <div class="stat-number">40+</div>
+    <div class="stat-card">
+        <span class="stat-icon">&#x1F30D;</span>
+        <div class="stat-value">40+</div>
         <div class="stat-label">Countries</div>
     </div>
-    """, unsafe_allow_html=True)
-
-with col4:
-    st.markdown("""
-    <div class="stat-box">
-        <div class="stat-number">4,000+</div>
+    <div class="stat-card">
+        <span class="stat-icon">&#x1F4E6;</span>
+        <div class="stat-value">4,000+</div>
         <div class="stat-label">Products</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("")
+
+st.markdown(f"""
+<div style="margin-bottom: 0.5rem;">
+    <span class="section-title">PLATFORM CAPABILITIES</span>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="feature-grid">
+    <div class="feature-card">
+        <div class="feature-icon">&#x26A1;</div>
+        <div class="feature-title">AI Query Engine</div>
+        <div class="feature-desc">
+            Natural language to SQL translation powered by Claude AI.
+            Ask questions in plain English and receive instant, accurate database queries.
+        </div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#x1F4C8;</div>
+        <div class="feature-title">Intelligent Visualization</div>
+        <div class="feature-desc">
+            Automatic chart type selection based on your data structure.
+            Line charts for trends, bar charts for comparisons, KPIs for metrics.
+        </div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#x1F3AF;</div>
+        <div class="feature-title">Interactive Dashboard</div>
+        <div class="feature-desc">
+            Explore revenue patterns, geographic distribution, product performance,
+            and customer analytics with real-time filtering.
+        </div>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">&#x1F4BE;</div>
+        <div class="feature-title">Data Export</div>
+        <div class="feature-desc">
+            Download query results as CSV for further analysis.
+            Full query history tracking for reference and auditing.
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("")
+with st.expander("// VIEW DATASET SCHEMA", expanded=False):
+    st.markdown(f"""
+    <p style="color: {c['text_tertiary']}; font-size: 0.8rem; margin-bottom: 1rem;">
+    Source: UCI Machine Learning Repository — Online Retail II Dataset
+    </p>
+    <div class="data-table-container">
+        <table class="data-table">
+            <tr>
+                <th>Variable</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>InvoiceNo</code></td>
+                <td>6-digit invoice number. Prefix <code>C</code> indicates a cancellation.</td>
+            </tr>
+            <tr>
+                <td><code>StockCode</code></td>
+                <td>5-digit product code uniquely assigned to each product.</td>
+            </tr>
+            <tr>
+                <td><code>Description</code></td>
+                <td>Product name and description.</td>
+            </tr>
+            <tr>
+                <td><code>Quantity</code></td>
+                <td>Quantity per transaction. Negative values indicate returns.</td>
+            </tr>
+            <tr>
+                <td><code>InvoiceDate</code></td>
+                <td>Transaction timestamp.</td>
+            </tr>
+            <tr>
+                <td><code>UnitPrice</code></td>
+                <td>Price per unit in GBP (£).</td>
+            </tr>
+            <tr>
+                <td><code>CustomerID</code></td>
+                <td>5-digit unique customer identifier.</td>
+            </tr>
+            <tr>
+                <td><code>Country</code></td>
+                <td>Customer's country of residence.</td>
+            </tr>
+        </table>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("")
+st.markdown(f"""
+<div class="getting-started">
+    <h4>QUICK START</h4>
+    <ol>
+        <li>
+            <strong>AI Copilot</strong> — Ask natural language questions:<br>
+            <code>What was total revenue in 2011?</code><br>
+            <code>Show monthly revenue trend</code><br>
+            <code>Top 10 products by revenue</code>
+        </li>
+        <li style="margin-top: 1rem;">
+            <strong>Dashboard</strong> — Explore pre-built analytics with filters for year, country, and more.
+        </li>
+        <li style="margin-top: 1rem;">
+            <strong>Dataset</strong> — Browse and download the raw transaction data.
+        </li>
+    </ol>
+</div>
+""", unsafe_allow_html=True)
 
-# Original Dataset Schema
-with st.expander("📋 Original Dataset Variables", expanded=False):
-    st.markdown("""
-    <p class="source-note">Source: UCI Machine Learning Repository - Online Retail II Dataset</p>
-    <table class="data-table">
-        <tr>
-            <th>Variable</th>
-            <th>Description</th>
-        </tr>
-        <tr>
-            <td><code>InvoiceNo</code></td>
-            <td>6-digit invoice number. Prefix <code>C</code> indicates a cancellation.</td>
-        </tr>
-        <tr>
-            <td><code>StockCode</code></td>
-            <td>5-digit product/item code uniquely assigned to each product.</td>
-        </tr>
-        <tr>
-            <td><code>Description</code></td>
-            <td>Product name/description.</td>
-        </tr>
-        <tr>
-            <td><code>Quantity</code></td>
-            <td>Quantity of each product per transaction. Negative values indicate returns.</td>
-        </tr>
-        <tr>
-            <td><code>InvoiceDate</code></td>
-            <td>Date and time when the transaction was generated.</td>
-        </tr>
-        <tr>
-            <td><code>UnitPrice</code></td>
-            <td>Product price per unit in GBP (£).</td>
-        </tr>
-        <tr>
-            <td><code>CustomerID</code></td>
-            <td>5-digit unique customer identifier.</td>
-        </tr>
-        <tr>
-            <td><code>Country</code></td>
-            <td>Country where the customer resides.</td>
-        </tr>
-    </table>
-    """, unsafe_allow_html=True)
-
-# Feature cards
-st.subheader("Features")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-title">🤖 AI Copilot</div>
-        <div class="feature-desc">
-            Ask questions in natural language and get instant SQL queries,
-            visualizations, and AI-generated insights. No SQL knowledge required.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-title">📈 Smart Visualizations</div>
-        <div class="feature-desc">
-            Automatic chart selection based on your data - line charts for trends,
-            bar charts for comparisons, and KPI cards for single metrics.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-title">📊 Interactive Dashboard</div>
-        <div class="feature-desc">
-            Explore revenue trends, geographic distribution, product performance,
-            and customer analytics with interactive filters and drill-downs.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-title">💾 Export & Share</div>
-        <div class="feature-desc">
-            Download query results as CSV files for further analysis in Excel
-            or other tools. Track your query history for reference.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Getting started
 st.markdown("---")
-st.subheader("Getting Started")
-
-st.markdown("""
-**1. Try the AI Copilot** - Navigate to the Copilot page and ask questions like:
-- "What was total revenue in 2011?"
-- "Show monthly revenue trend"
-- "Top 10 products by revenue"
-- "Which country has the highest sales?"
-
-**2. Explore the Dashboard** - Use the Dashboard page for pre-built analytics:
-- Filter by year and country
-- View revenue trends over time
-- Analyze geographic distribution
-- Discover top products and customers
-""")
-
-# Footer
-st.markdown("---")
-st.markdown(
-    '<p style="color: #64748b; font-size: 0.85rem;">Built with Streamlit and Claude AI | '
-    'Data: UCI Online Retail II Dataset</p>',
-    unsafe_allow_html=True
-)
+st.markdown(f"""
+<p class="footer-text">
+    Built with Streamlit + Claude AI &nbsp;|&nbsp;
+    Data: <a href="https://archive.ics.uci.edu/dataset/502/online+retail+ii">UCI Online Retail II</a>
+</p>
+""", unsafe_allow_html=True)

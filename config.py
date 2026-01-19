@@ -154,10 +154,64 @@ Common query patterns:
     GROUP BY year, month
   ) GROUP BY year
 
+- Comparing specific value vs aggregate (e.g., lowest month vs average):
+  SELECT
+    low.month AS lowest_month,
+    low.monthly_revenue AS lowest_revenue,
+    avg_data.avg_monthly_revenue
+  FROM (
+    SELECT strftime('%Y-%m', o.invoice_date) AS month, SUM(oi.revenue) AS monthly_revenue
+    FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+    WHERE strftime('%Y', o.invoice_date) = '2010'
+    GROUP BY strftime('%Y-%m', o.invoice_date)
+    ORDER BY monthly_revenue ASC LIMIT 1
+  ) AS low
+  CROSS JOIN (
+    SELECT AVG(monthly_revenue) AS avg_monthly_revenue FROM (
+      SELECT SUM(oi.revenue) AS monthly_revenue
+      FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+      WHERE strftime('%Y', o.invoice_date) = '2010'
+      GROUP BY strftime('%Y-%m', o.invoice_date)
+    ) AS monthly_totals
+  ) AS avg_data
+
 IMPORTANT RULES FOR SUBQUERIES:
 - Window functions (ROW_NUMBER, RANK, etc.) must be inside a subquery. Never use WINDOW keyword standalone.
 - In outer queries, only reference columns that exist in the subquery's SELECT clause (the aliased columns).
 - Table aliases (like o, oi) are NOT available outside their subquery - use the column aliases instead.
+- EVERY subquery MUST have an alias in SQLite - e.g., (...) AS subquery_name. Missing aliases cause "no such column" errors.
+- When using CROSS JOIN with subqueries, BOTH subqueries need aliases.
+- Nested subqueries (subquery inside subquery) each need their own alias.
+
+SQLITE LIMITATIONS - Functions that do NOT exist:
+- median() - DOES NOT EXIST. Calculate manually (see pattern below)
+- STDDEV(), VARIANCE() - DO NOT EXIST
+- PERCENTILE_CONT(), PERCENTILE_DISC() - DO NOT EXIST
+
+- Calculating MEDIAN in SQLite (use this pattern):
+  SELECT AVG(monthly_revenue) AS median_monthly_revenue
+  FROM (
+    SELECT monthly_revenue
+    FROM (
+      SELECT SUM(oi.revenue) AS monthly_revenue
+      FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+      WHERE strftime('%Y', o.invoice_date) = '2010'
+      GROUP BY strftime('%Y-%m', o.invoice_date)
+    ) AS data
+    ORDER BY monthly_revenue
+    LIMIT 2 - (SELECT COUNT(*) FROM (
+      SELECT SUM(oi.revenue) AS monthly_revenue
+      FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+      WHERE strftime('%Y', o.invoice_date) = '2010'
+      GROUP BY strftime('%Y-%m', o.invoice_date)
+    ) AS cnt) % 2
+    OFFSET (SELECT (COUNT(*) - 1) / 2 FROM (
+      SELECT SUM(oi.revenue) AS monthly_revenue
+      FROM order_items oi JOIN orders o ON oi.invoice_id = o.invoice_id
+      WHERE strftime('%Y', o.invoice_date) = '2010'
+      GROUP BY strftime('%Y-%m', o.invoice_date)
+    ) AS cnt)
+  ) AS median_calc
 """
 
 INSIGHT_SYSTEM_PROMPT = """You are a business data analyst providing brief insights.

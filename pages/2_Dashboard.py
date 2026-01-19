@@ -1,83 +1,71 @@
-"""Dashboard Page - Interactive Analytics Dashboard for Online Retail Data"""
-
 import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
 from config import DATABASE_PATH
+from utils.theme import (
+    init_theme, get_theme_colors,
+    get_global_css, get_chart_title_css, get_plotly_theme, apply_plotly_theme
+)
 
-# Custom CSS
-st.markdown("""
+init_theme()
+st.markdown(get_global_css(), unsafe_allow_html=True)
+st.markdown(get_chart_title_css(), unsafe_allow_html=True)
+
+c = get_theme_colors()
+PLOTLY_THEME = get_plotly_theme()
+
+st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    .filter-label {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        color: {c['text_tertiary']};
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.25rem;
+    }}
 
-    * { font-family: 'Inter', sans-serif; }
+    .sidebar-stat {{
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid {c['border']};
+    }}
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e3a5f 0%, #0d1b2a 100%);
-    }
-    section[data-testid="stSidebar"] * { color: #e0e7ee !important; }
-    section[data-testid="stSidebar"] .stSelectbox label,
-    section[data-testid="stSidebar"] .stMultiSelect label {
-        font-weight: 500;
-        font-size: 0.85rem;
-    }
+    .sidebar-stat-label {{
+        font-size: 0.8rem;
+        color: {c['text_tertiary']};
+    }}
 
-    /* Main area */
-    .block-container { padding-top: 1.5rem; max-width: 1400px; }
+    .sidebar-stat-value {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        color: {c['accent_primary']};
+    }}
 
-    /* Metric cards */
-    [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem 1.25rem;
-        border-radius: 12px;
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    [data-testid="stMetric"] label { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
-    [data-testid="stMetric"] [data-testid="stMetricValue"] { color: white !important; font-weight: 700; }
-    [data-testid="stMetric"] [data-testid="stMetricDelta"] { color: rgba(255,255,255,0.9) !important; }
+    .dashboard-header {{
+        margin-bottom: 2rem;
+    }}
 
-    /* Chart section titles */
-    .chart-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #a5b4fc;
-        margin-bottom: 0.5rem;
-        padding-top: 0.5rem;
-    }
+    .dashboard-title {{
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: {c['text_primary']};
+        margin-bottom: 0.25rem;
+    }}
 
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header[data-testid="stHeader"] { background: transparent; }
-
-    /* Tab styling for dark theme */
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(255,255,255,0.1);
-        border-radius: 8px;
-        padding: 8px 16px;
-        font-weight: 500;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    }
-
-    /* Dataframe styling for dark theme */
-    .stDataFrame {
-        border-radius: 8px;
-    }
+    .dashboard-subtitle {{
+        font-size: 0.95rem;
+        color: {c['text_tertiary']};
+    }}
 </style>
 """, unsafe_allow_html=True)
 
 
 @st.cache_data(ttl=600)
 def load_data():
-    """Load and cache the main dataset"""
     conn = sqlite3.connect(DATABASE_PATH)
-
     query = """
     SELECT
         o.invoice_id,
@@ -107,7 +95,6 @@ def load_data():
 
 @st.cache_data(ttl=600)
 def get_summary_stats(df):
-    """Calculate summary statistics"""
     return {
         'total_revenue': df['revenue'].sum(),
         'total_orders': df['invoice_id'].nunique(),
@@ -119,7 +106,6 @@ def get_summary_stats(df):
 
 
 def format_number(num, prefix=""):
-    """Format large numbers for display"""
     if num >= 1_000_000:
         return f"{prefix}{num/1_000_000:.2f}M"
     elif num >= 1_000:
@@ -128,62 +114,61 @@ def format_number(num, prefix=""):
         return f"{prefix}{num:.0f}"
 
 
-def apply_chart_style(fig, height=350, xaxis_title="", yaxis_title="", **extra_layout):
-    """Apply consistent dark theme styling to Plotly charts"""
-    layout_config = {
-        'margin': dict(l=0, r=0, t=10, b=0),
-        'plot_bgcolor': 'rgba(0,0,0,0)',
-        'paper_bgcolor': 'rgba(0,0,0,0)',
-        'font_color': '#94a3b8',
-        'height': height,
-        'xaxis_title': xaxis_title,
-        'yaxis_title': yaxis_title,
-        **extra_layout
-    }
-    fig.update_layout(**layout_config)
-    fig.update_xaxes(color='#94a3b8')
-    fig.update_yaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', color='#94a3b8')
+def create_chart(fig, height=350):
+    apply_plotly_theme(fig, height)
     return fig
 
 
-# Load data
 df = load_data()
 
-# ===== SIDEBAR FILTERS =====
+# Sidebar filters
 with st.sidebar:
-    st.markdown("### 📊 Sales Dashboard")
-    st.caption("Interactive Analytics")
+    st.markdown("### // DASHBOARD")
+    st.markdown(f'<p style="color: {c["text_tertiary"]}; font-size: 0.75rem;">Interactive Analytics</p>', unsafe_allow_html=True)
     st.divider()
 
-    # Year filter
+    st.markdown(f'<p class="filter-label">Filter by Year</p>', unsafe_allow_html=True)
     years = sorted(df['year'].unique())
     selected_years = st.multiselect(
-        "Select Years",
+        "Years",
         options=years,
         default=[],
-        placeholder="All years"
+        placeholder="All years",
+        label_visibility="collapsed"
     )
 
-    # Country filter
+    st.markdown(f'<p class="filter-label">Filter by Country</p>', unsafe_allow_html=True)
     countries = sorted(df['country'].unique())
     selected_countries = st.multiselect(
-        "Select Countries",
+        "Countries",
         options=countries,
         default=[],
-        placeholder="All countries"
+        placeholder="All countries",
+        label_visibility="collapsed"
     )
 
-    # Top N filter
-    top_n = st.slider("Top N Items", min_value=5, max_value=20, value=10)
+    st.markdown(f'<p class="filter-label">Top N Items</p>', unsafe_allow_html=True)
+    top_n = st.slider("Top N", min_value=5, max_value=20, value=10, label_visibility="collapsed")
 
     st.divider()
 
-    # Quick stats
-    st.markdown("**Quick Stats**")
-    st.caption(f"Data: {df['invoice_date'].min().strftime('%b %Y')} - {df['invoice_date'].max().strftime('%b %Y')}")
-    st.caption(f"{len(df):,} transactions")
+    st.markdown("### // DATA RANGE")
+    st.markdown(f"""
+    <div class="sidebar-stat">
+        <span class="sidebar-stat-label">From</span>
+        <span class="sidebar-stat-value">{df['invoice_date'].min().strftime('%b %Y')}</span>
+    </div>
+    <div class="sidebar-stat">
+        <span class="sidebar-stat-label">To</span>
+        <span class="sidebar-stat-value">{df['invoice_date'].max().strftime('%b %Y')}</span>
+    </div>
+    <div class="sidebar-stat">
+        <span class="sidebar-stat-label">Records</span>
+        <span class="sidebar-stat-value">{len(df):,}</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Apply filters (empty selection means all)
+# Apply filters
 filtered_df = df.copy()
 
 if selected_years:
@@ -196,15 +181,18 @@ if filtered_df.empty:
     st.warning("No data available for the selected filters. Please adjust your selection.")
     st.stop()
 
-# Calculate stats
 stats = get_summary_stats(filtered_df)
 
-# ===== HEADER =====
-st.markdown("# 📊 Sales Analytics Dashboard")
-st.markdown("Real-time insights from Online Retail II dataset")
+# Header
+st.markdown(f"""
+<div class="dashboard-header">
+    <h1 class="dashboard-title"><span style="color: {c['accent_primary']};">📊</span> Sales Dashboard</h1>
+    <p class="dashboard-subtitle">Real-time insights from Online Retail II dataset</p>
+</div>
+""", unsafe_allow_html=True)
 
-# ===== KPI METRICS =====
-st.markdown("### Key Metrics")
+# KPI metrics
+st.markdown('<p class="chart-section-title">Key Metrics</p>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -221,15 +209,15 @@ with col5:
 
 st.markdown("")
 
-# ===== TABS =====
-tab1, tab2, tab3, tab4 = st.tabs(["📈 Revenue Trends", "🌍 Geographic", "📦 Products", "👥 Customers"])
+# Tabs
+tab1, tab2, tab3, tab4 = st.tabs(["Revenue Trends", "Geographic", "Products", "Customers"])
 
-# ----- TAB 1: REVENUE TRENDS -----
+# Tab 1: Revenue Trends
 with tab1:
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.markdown('<p class="chart-title">📈 Monthly Revenue Trend</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Monthly Revenue Trend</p>', unsafe_allow_html=True)
 
         monthly_revenue = filtered_df.groupby('month')['revenue'].sum().reset_index()
         monthly_revenue = monthly_revenue.sort_values('month')
@@ -238,15 +226,15 @@ with tab1:
             monthly_revenue,
             x='month',
             y='revenue',
-            color_discrete_sequence=['#667eea']
+            color_discrete_sequence=[PLOTLY_THEME['primary_color']]
         )
-        fig.update_traces(line=dict(width=2), fillcolor='rgba(102, 126, 234, 0.3)')
-        apply_chart_style(fig, yaxis_title="Revenue (£)", hovermode='x unified')
-        fig.update_xaxes(showgrid=False, tickangle=45)
+        fig.update_traces(line=dict(width=2), fillcolor=c['accent_glow'])
+        create_chart(fig)
+        fig.update_xaxes(tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown('<p class="chart-title">📊 Revenue by Year</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Revenue by Year</p>', unsafe_allow_html=True)
 
         yearly_revenue = filtered_df.groupby('year')['revenue'].sum().reset_index()
 
@@ -254,17 +242,15 @@ with tab1:
             yearly_revenue,
             x='year',
             y='revenue',
-            color_discrete_sequence=['#764ba2']
+            color_discrete_sequence=[PLOTLY_THEME['secondary_color']]
         )
-        apply_chart_style(fig, yaxis_title="Revenue (£)")
-        fig.update_xaxes(showgrid=False)
+        create_chart(fig)
         st.plotly_chart(fig, use_container_width=True)
 
-    # Second row
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<p class="chart-title">📅 Revenue by Day of Week</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Revenue by Day of Week</p>', unsafe_allow_html=True)
 
         day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         daily_revenue = filtered_df.groupby('weekday')['revenue'].sum().reset_index()
@@ -276,13 +262,14 @@ with tab1:
             x='weekday',
             y='revenue',
             color='revenue',
-            color_continuous_scale='Purples'
+            color_continuous_scale=PLOTLY_THEME['color_scale']
         )
-        apply_chart_style(fig, height=300, yaxis_title="Revenue (£)", showlegend=False, coloraxis_showscale=False)
+        create_chart(fig, height=300)
+        fig.update_layout(showlegend=False, coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown('<p class="chart-title">🕐 Revenue by Hour of Day</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Revenue by Hour of Day</p>', unsafe_allow_html=True)
 
         hourly_revenue = filtered_df.groupby('hour')['revenue'].sum().reset_index()
 
@@ -291,19 +278,19 @@ with tab1:
             x='hour',
             y='revenue',
             markers=True,
-            color_discrete_sequence=['#667eea']
+            color_discrete_sequence=[PLOTLY_THEME['primary_color']]
         )
         fig.update_traces(line=dict(width=3), marker=dict(size=8))
-        apply_chart_style(fig, height=300, xaxis_title="Hour", yaxis_title="Revenue (£)")
-        fig.update_xaxes(showgrid=False, dtick=2)
+        create_chart(fig, height=300)
+        fig.update_xaxes(dtick=2)
         st.plotly_chart(fig, use_container_width=True)
 
-# ----- TAB 2: GEOGRAPHIC -----
+# Tab 2: Geographic
 with tab2:
     col1, col2 = st.columns([3, 2])
 
     with col1:
-        st.markdown('<p class="chart-title">🌍 Revenue by Country</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Revenue by Country</p>', unsafe_allow_html=True)
 
         country_revenue = filtered_df.groupby('country').agg({
             'revenue': 'sum',
@@ -319,20 +306,21 @@ with tab2:
             x='revenue',
             orientation='h',
             color='revenue',
-            color_continuous_scale='Purples',
+            color_continuous_scale=PLOTLY_THEME['color_scale'],
             hover_data=['orders', 'customers']
         )
-        apply_chart_style(
-            fig, height=400, xaxis_title="Revenue (£)",
-            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=False,
+            coloraxis_showscale=False,
+            yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
+        fig.update_xaxes(showgrid=True, gridcolor=PLOTLY_THEME['grid_color'])
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown('<p class="chart-title">🥧 Revenue Distribution</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Revenue Distribution</p>', unsafe_allow_html=True)
 
-        # Top 5 + Others
         top_countries = country_revenue.head(5).copy()
         others_revenue = country_revenue.iloc[5:]['revenue'].sum() if len(country_revenue) > 5 else 0
 
@@ -346,18 +334,18 @@ with tab2:
             pie_data,
             values='revenue',
             names='country',
-            color_discrete_sequence=px.colors.sequential.Purples_r,
+            color_discrete_sequence=PLOTLY_THEME['color_sequence'],
             hole=0.4
         )
-        apply_chart_style(
-            fig, height=400,
-            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, font=dict(color='#94a3b8'))
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.2, font=dict(color=c['text_secondary']))
         )
-        fig.update_traces(textposition='inside', textinfo='percent+label', textfont_color='white')
+        fig.update_traces(textposition='inside', textinfo='percent+label', textfont_color='#0f172a')
         st.plotly_chart(fig, use_container_width=True)
 
-    # Country comparison table
-    st.markdown('<p class="chart-title">📋 Country Performance Summary</p>', unsafe_allow_html=True)
+    st.markdown('<p class="chart-section-title">Country Performance Summary</p>', unsafe_allow_html=True)
 
     country_summary = filtered_df.groupby('country').agg({
         'revenue': 'sum',
@@ -369,7 +357,6 @@ with tab2:
     country_summary['Avg Order Value'] = country_summary['Revenue'] / country_summary['Orders']
     country_summary = country_summary.sort_values('Revenue', ascending=False).head(top_n)
 
-    # Format for display
     display_df = country_summary.copy()
     display_df['Revenue'] = display_df['Revenue'].apply(lambda x: f"£{x:,.0f}")
     display_df['Avg Order Value'] = display_df['Avg Order Value'].apply(lambda x: f"£{x:.2f}")
@@ -377,12 +364,12 @@ with tab2:
 
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-# ----- TAB 3: PRODUCTS -----
+# Tab 3: Products
 with tab3:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<p class="chart-title">🏆 Top Products by Revenue</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Top Products by Revenue</p>', unsafe_allow_html=True)
 
         product_revenue = filtered_df.groupby('description')['revenue'].sum().reset_index()
         product_revenue = product_revenue.sort_values('revenue', ascending=False).head(top_n)
@@ -394,17 +381,19 @@ with tab3:
             x='revenue',
             orientation='h',
             color='revenue',
-            color_continuous_scale='Purples'
+            color_continuous_scale=PLOTLY_THEME['color_scale']
         )
-        apply_chart_style(
-            fig, height=400, xaxis_title="Revenue (£)",
-            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=False,
+            coloraxis_showscale=False,
+            yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
+        fig.update_xaxes(showgrid=True, gridcolor=PLOTLY_THEME['grid_color'])
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown('<p class="chart-title">📦 Top Products by Quantity</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Top Products by Quantity</p>', unsafe_allow_html=True)
 
         product_qty = filtered_df.groupby('description')['quantity'].sum().reset_index()
         product_qty = product_qty.sort_values('quantity', ascending=False).head(top_n)
@@ -416,17 +405,18 @@ with tab3:
             x='quantity',
             orientation='h',
             color='quantity',
-            color_continuous_scale='Greens'
+            color_continuous_scale=[[0, '#064e3b'], [0.5, '#059669'], [1, '#34d399']]
         )
-        apply_chart_style(
-            fig, height=400, xaxis_title="Units Sold",
-            showlegend=False, coloraxis_showscale=False, yaxis={'categoryorder': 'total ascending'}
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=False,
+            coloraxis_showscale=False,
+            yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)')
+        fig.update_xaxes(showgrid=True, gridcolor=PLOTLY_THEME['grid_color'])
         st.plotly_chart(fig, use_container_width=True)
 
-    # Product price tier analysis
-    st.markdown('<p class="chart-title">💰 Revenue by Price Tier</p>', unsafe_allow_html=True)
+    st.markdown('<p class="chart-section-title">Revenue by Price Tier</p>', unsafe_allow_html=True)
 
     price_df = filtered_df[filtered_df['unit_price'] > 0].copy()
     price_bins = [0, 1, 2, 5, 10, 25, float('inf')]
@@ -448,38 +438,36 @@ with tab3:
             x='price_tier',
             y='revenue',
             color='products',
-            color_continuous_scale='Greens',
+            color_continuous_scale=[[0, '#064e3b'], [0.5, '#059669'], [1, '#34d399']],
             hover_data={'units_sold': ':,', 'products': True}
         )
-        apply_chart_style(
-            fig, height=250, xaxis_title="Price Tier", yaxis_title="Revenue (£)",
-            coloraxis_showscale=False
-        )
-        fig.update_xaxes(showgrid=False)
+        create_chart(fig, height=250)
+        fig.update_layout(coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
-        st.markdown('<p class="chart-title">📦 Units Sold by Price Tier</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Units Sold by Price Tier</p>', unsafe_allow_html=True)
         fig = px.pie(
             price_summary,
             values='units_sold',
             names='price_tier',
-            color_discrete_sequence=px.colors.sequential.Greens_r,
+            color_discrete_sequence=['#064e3b', '#047857', '#059669', '#10b981', '#34d399', '#6ee7b7'],
             hole=0.4
         )
-        apply_chart_style(
-            fig, height=250,
-            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
+        create_chart(fig, height=250)
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color=c['text_secondary']))
         )
         fig.update_traces(textposition='inside', textinfo='percent', textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
 
-# ----- TAB 4: CUSTOMERS -----
+# Tab 4: Customers
 with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<p class="chart-title">👥 Top Customers by Revenue</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Top Customers by Revenue</p>', unsafe_allow_html=True)
 
         customer_revenue = filtered_df.groupby('customer_id').agg({
             'revenue': 'sum',
@@ -496,21 +484,22 @@ with tab4:
             x='revenue',
             orientation='h',
             color='orders',
-            color_continuous_scale='Blues',
+            color_continuous_scale=[[0, '#1e3a8a'], [0.5, '#3b82f6'], [1, '#93c5fd']],
             hover_data={'revenue_formatted': True, 'orders': True, 'revenue': False, 'customer_label': False},
             labels={'revenue_formatted': 'Revenue', 'orders': 'Orders'}
         )
-        apply_chart_style(
-            fig, height=400, xaxis_title="Revenue (£)",
-            showlegend=False, coloraxis_showscale=True,
-            coloraxis_colorbar=dict(title="Orders", tickfont=dict(color='#94a3b8'), title_font=dict(color='#94a3b8')),
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=False,
+            coloraxis_showscale=True,
+            coloraxis_colorbar=dict(title="Orders", tickfont=dict(color=c['text_secondary']), title_font=dict(color=c['text_secondary'])),
             yaxis={'categoryorder': 'total ascending'}
         )
-        fig.update_xaxes(showgrid=True, gridcolor='rgba(148,163,184,0.2)', type='log', dtick=1)
+        fig.update_xaxes(showgrid=True, gridcolor=PLOTLY_THEME['grid_color'], type='log', dtick=1)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown('<p class="chart-title">🔄 Customer Order Frequency</p>', unsafe_allow_html=True)
+        st.markdown('<p class="chart-section-title">Customer Order Frequency</p>', unsafe_allow_html=True)
 
         order_frequency = filtered_df.groupby('customer_id')['invoice_id'].nunique().reset_index()
         order_frequency.columns = ['customer_id', 'order_count']
@@ -526,22 +515,21 @@ with tab4:
             freq_summary,
             values='count',
             names='frequency_group',
-            color_discrete_sequence=px.colors.sequential.Blues_r,
+            color_discrete_sequence=['#1e3a8a', '#1d4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'],
             hole=0.4
         )
-        apply_chart_style(
-            fig, height=400,
-            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
+        create_chart(fig, height=400)
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color=c['text_secondary']))
         )
         fig.update_traces(textfont_color='white')
         st.plotly_chart(fig, use_container_width=True)
 
-    # Customer lifetime value segments
-    st.markdown('<p class="chart-title">💎 Customer Value Segments</p>', unsafe_allow_html=True)
+    st.markdown('<p class="chart-section-title">Customer Value Segments</p>', unsafe_allow_html=True)
 
     clv = filtered_df.groupby('customer_id')['revenue'].sum().reset_index()
 
-    # Create meaningful CLV segments
     clv_bins = [0, 100, 500, 1000, 2500, 5000, float('inf')]
     clv_labels = ['£0-100', '£100-500', '£500-1K', '£1K-2.5K', '£2.5K-5K', '£5K+']
     clv['segment'] = pd.cut(clv['revenue'], bins=clv_bins, labels=clv_labels)
@@ -561,14 +549,11 @@ with tab4:
             x='segment',
             y='customers',
             color='avg_revenue',
-            color_continuous_scale='Purples',
+            color_continuous_scale=PLOTLY_THEME['color_scale'],
             hover_data={'total_revenue': ':,.0f', 'avg_revenue': ':,.0f'}
         )
-        apply_chart_style(
-            fig, height=280, xaxis_title="Value Segment", yaxis_title="Number of Customers",
-            coloraxis_showscale=False
-        )
-        fig.update_xaxes(showgrid=False)
+        create_chart(fig, height=280)
+        fig.update_layout(coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
@@ -576,17 +561,17 @@ with tab4:
             clv_summary,
             values='total_revenue',
             names='segment',
-            color_discrete_sequence=px.colors.sequential.Purples_r,
+            color_discrete_sequence=PLOTLY_THEME['color_sequence'],
             hole=0.4
         )
-        apply_chart_style(
-            fig, height=280,
-            showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color='#94a3b8'))
+        create_chart(fig, height=280)
+        fig.update_layout(
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, font=dict(color=c['text_secondary']))
         )
-        fig.update_traces(textposition='inside', textinfo='percent', textfont_color='white')
+        fig.update_traces(textposition='inside', textinfo='percent', textfont_color='#0f172a')
         st.plotly_chart(fig, use_container_width=True)
 
-    # Customer stats
     st.markdown("")
     col1, col2, col3 = st.columns(3)
     with col1:
