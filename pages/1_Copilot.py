@@ -627,9 +627,7 @@ if question:
 
                     with col1:
                         st.markdown(f'<span class="section-title">Visualization</span>', unsafe_allow_html=True)
-                        st.markdown('<div class="viz-container">', unsafe_allow_html=True)
                         render_chart(df, chart_type)
-                        st.markdown('</div>', unsafe_allow_html=True)
 
                     with col2:
                         st.markdown(f'<span class="section-title">Insight</span>', unsafe_allow_html=True)
