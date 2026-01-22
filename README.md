@@ -1,6 +1,7 @@
 # Analytics Copilot
-
-<img width="1311" height="579" alt="image" src="https://github.com/user-attachments/assets/97c420c7-5683-424d-b14f-354ccbe35ea7" />
+<a href="https://online-retail-store-sales-analysis-copilot.streamlit.app">
+   <img width="1311" height="579" alt="image" src="https://github.com/user-attachments/assets/97c420c7-5683-424d-b14f-354ccbe35ea7" />
+</a>
 
 
 An AI-powered business intelligence tool that lets you query your sales data using natural language. Built with Streamlit and Claude AI.
