@@ -1,5 +1,8 @@
 # Analytics Copilot
 
+<img width="1311" height="579" alt="image" src="https://github.com/user-attachments/assets/97c420c7-5683-424d-b14f-354ccbe35ea7" />
+
+
 An AI-powered business intelligence tool that lets you query your sales data using natural language. Built with Streamlit and Claude AI.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://online-retail-store-sales-analysis-copilot.streamlit.app/)
@@ -17,6 +20,7 @@ Analytics Copilot transforms natural language questions into SQL queries, execut
 - "Show monthly revenue trend"
 - "Top 10 products by revenue"
 - "Which country has the highest sales?"
+<img width="1291" height="277" alt="image" src="https://github.com/user-attachments/assets/92f6d5e2-ae46-463c-98f1-1ca4ce24a691" />
 
 ## Dataset
 
