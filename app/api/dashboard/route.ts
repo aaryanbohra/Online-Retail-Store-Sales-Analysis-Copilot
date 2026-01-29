@@ -1,30 +1,38 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-export async function GET(request: Request) {
+function isValidFilter(values: string[]): boolean {
+  return values.length > 0 && values[0] !== '' && values[0] !== 'all';
+}
+
+function buildWhereClause(years: string[], countries: string[]): { whereClause: string; values: string[] } {
+  const conditions: string[] = [];
+  const values: string[] = [];
+  let paramCount = 1;
+
+  if (isValidFilter(years)) {
+    const placeholders = years.map(() => `$${paramCount++}`).join(',');
+    conditions.push(`TO_CHAR(o.invoice_date, 'YYYY') IN (${placeholders})`);
+    values.push(...years);
+  }
+
+  if (isValidFilter(countries)) {
+    const placeholders = countries.map(() => `$${paramCount++}`).join(',');
+    conditions.push(`o.country IN (${placeholders})`);
+    values.push(...countries);
+  }
+
+  const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+  return { whereClause, values };
+}
+
+export async function GET(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
     const years = searchParams.get('year')?.split(',') || [];
     const countries = searchParams.get('country')?.split(',') || [];
 
-    // Build WHERE clause
-    let conditions: string[] = [];
-    let values: any[] = [];
-    let paramCount = 1;
-
-    if (years.length > 0 && years[0] !== '' && years[0] !== 'all') {
-      const placeholders = years.map(() => `$${paramCount++}`).join(',');
-      conditions.push(`TO_CHAR(o.invoice_date, 'YYYY') IN (${placeholders})`);
-      values.push(...years);
-    }
-
-    if (countries.length > 0 && countries[0] !== '' && countries[0] !== 'all') {
-      const placeholders = countries.map(() => `$${paramCount++}`).join(',');
-      conditions.push(`o.country IN (${placeholders})`);
-      values.push(...countries);
-    }
-
-    const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
+    const { whereClause, values } = buildWhereClause(years, countries);
 
     // 1. KPIs
     const kpiQuery = `
@@ -108,10 +116,10 @@ export async function GET(request: Request) {
     // 7. Price Tiers
     const priceTierQuery = `
             WITH price_data AS (
-                SELECT 
+                SELECT
                     revenue,
                     quantity,
-                    CASE 
+                    CASE
                         WHEN unit_price < 1 THEN 'Under £1'
                         WHEN unit_price < 2 THEN '£1-2'
                         WHEN unit_price < 5 THEN '£2-5'
@@ -121,8 +129,7 @@ export async function GET(request: Request) {
                     END as tier
                 FROM order_items oi
                 JOIN orders o ON oi.invoice_id = o.invoice_id
-                ${whereClause}
-                WHERE unit_price > 0
+                ${whereClause ? whereClause + ' AND unit_price > 0' : 'WHERE unit_price > 0'}
             )
             SELECT 
                 tier,
@@ -136,14 +143,13 @@ export async function GET(request: Request) {
 
     // 8. Top Customers
     const customerQuery = `
-            SELECT 
+            SELECT
                 o.customer_id,
                 SUM(oi.revenue) as revenue,
                 COUNT(DISTINCT o.invoice_id) as orders
             FROM order_items oi
             JOIN orders o ON oi.invoice_id = o.invoice_id
-            ${whereClause}
-            WHERE o.customer_id IS NOT NULL
+            ${whereClause ? whereClause + ' AND o.customer_id IS NOT NULL' : 'WHERE o.customer_id IS NOT NULL'}
             GROUP BY o.customer_id
             ORDER BY revenue DESC
             LIMIT 10
@@ -152,14 +158,13 @@ export async function GET(request: Request) {
     // 9. Customer Segments & Frequency
     const customerFrequencyQuery = `
             WITH customer_stats AS (
-                SELECT 
+                SELECT
                     o.customer_id,
                     COUNT(DISTINCT o.invoice_id) as order_count,
                     SUM(oi.revenue) as total_revenue
                 FROM order_items oi
                 JOIN orders o ON oi.invoice_id = o.invoice_id
-                ${whereClause}
-                WHERE o.customer_id IS NOT NULL
+                ${whereClause ? whereClause + ' AND o.customer_id IS NOT NULL' : 'WHERE o.customer_id IS NOT NULL'}
                 GROUP BY o.customer_id
             ),
             frequency_groups AS (

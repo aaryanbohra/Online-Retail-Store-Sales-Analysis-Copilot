@@ -16,24 +16,33 @@ interface DynamicChartProps {
 
 const COLORS = ['#f59e0b', '#fbbf24', '#d97706', '#b45309', '#92400e', '#78350f'];
 
-function formatValue(val: any): string {
+function formatValue(val: unknown): string {
     if (typeof val === 'number') {
         if (val > 1000000) return `${(val / 1000000).toFixed(1)}M`;
         if (val > 1000) return `${(val / 1000).toFixed(1)}K`;
         return val.toLocaleString(undefined, { maximumFractionDigits: 2 });
     }
-    return val;
+    return String(val ?? '');
 }
 
-function CustomTooltip({ active, payload, label }: any): React.ReactElement | null {
-    if (!active || !payload || payload.length === 0) {
-        return null;
-    }
+interface TooltipPayloadItem {
+    name: string;
+    value: unknown;
+}
+
+interface CustomTooltipProps {
+    active?: boolean;
+    payload?: TooltipPayloadItem[];
+    label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps): React.ReactElement | null {
+    if (!active || !payload || payload.length === 0) return null;
 
     return (
         <div className="bg-[#0a0f18] border border-amber-500/20 p-3 rounded-xl shadow-2xl backdrop-blur-md">
             <p className="text-[0.7rem] font-bold text-amber-500 uppercase tracking-widest mb-1">{label}</p>
-            {payload.map((entry: any, i: number) => (
+            {payload.map((entry, i) => (
                 <p key={i} className="text-[0.85rem] font-medium text-slate-200">
                     {entry.name}: <span className="accent-gradient font-bold">{formatValue(entry.value)}</span>
                 </p>

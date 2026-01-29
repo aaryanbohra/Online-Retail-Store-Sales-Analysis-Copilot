@@ -53,9 +53,9 @@ export default function DashboardPage() {
                     <p className="text-slate-400 font-medium">Real-time business intelligence for Online Retail.</p>
                 </div>
 
-                <div className="flex flex-wrap gap-3 bg-slate-950/50 p-2 rounded-2xl border border-white/5 backdrop-blur-md">
+                <div className="flex flex-wrap gap-3 bg-black/20 p-2 rounded-2xl border border-white/5 backdrop-blur-md">
                     <Select value={selectedYear} onValueChange={setSelectedYear}>
-                        <SelectTrigger className="w-[140px] bg-slate-900/50 border-white/10 text-white rounded-xl focus:ring-amber-500/50">
+                        <SelectTrigger className="w-[140px] bg-[#0f172a]/40 border-white/10 text-white rounded-xl focus:ring-amber-500/50">
                             <SelectValue placeholder="All Years" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0a0f18] border-white/10 text-white">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                     </Select>
 
                     <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                        <SelectTrigger className="w-[180px] bg-slate-900/50 border-white/10 text-white rounded-xl focus:ring-amber-500/50">
+                        <SelectTrigger className="w-[180px] bg-[#0f172a]/40 border-white/10 text-white rounded-xl focus:ring-amber-500/50">
                             <SelectValue placeholder="All Countries" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0a0f18] border-white/10 text-white">
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                     </div>
 
                     <Tabs defaultValue="revenue" className="space-y-8 mt-10">
-                        <TabsList className="bg-slate-950/50 p-1 rounded-2xl border border-white/5 inline-flex backdrop-blur-md">
+                        <TabsList className="bg-black/20 p-1 rounded-2xl border border-white/5 inline-flex backdrop-blur-md">
                             <TabsTrigger value="revenue" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-amber-500 data-[state=active]:text-[#0a0f18] font-bold tracking-tight transition-all text-slate-400 text-sm">Revenue Trends</TabsTrigger>
                             <TabsTrigger value="geographic" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-amber-500 data-[state=active]:text-[#0a0f18] font-bold tracking-tight transition-all text-slate-400 text-sm">Geographic</TabsTrigger>
                             <TabsTrigger value="products" className="rounded-xl px-6 py-2.5 data-[state=active]:bg-amber-500 data-[state=active]:text-[#0a0f18] font-bold tracking-tight transition-all text-slate-400 text-sm">Products</TabsTrigger>

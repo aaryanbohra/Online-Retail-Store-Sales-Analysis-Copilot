@@ -48,7 +48,7 @@ export default function DatasetPage() {
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-slate-800/50 border-white/5 hover:bg-slate-800/50">
+                            <TableRow className="bg-[#1e293b]/30 border-white/5 hover:bg-[#1e293b]/40">
                                 <TableHead className="font-mono text-[0.7rem] font-bold text-amber-500 uppercase tracking-widest h-14">Invoice</TableHead>
                                 <TableHead className="font-mono text-[0.7rem] font-bold text-amber-500 uppercase tracking-widest h-14">Date</TableHead>
                                 <TableHead className="font-mono text-[0.7rem] font-bold text-amber-500 uppercase tracking-widest h-14">Customer</TableHead>
@@ -65,7 +65,7 @@ export default function DatasetPage() {
                                     <TableRow key={i} className="border-white/5 animate-pulse">
                                         {Array.from({ length: 8 }).map((_, j) => (
                                             <TableCell key={j} className="h-12">
-                                                <div className="h-2 bg-slate-800 rounded w-full opacity-50" />
+                                                <div className="h-2 bg-[#1e293b]/20 rounded w-full opacity-50" />
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -88,7 +88,7 @@ export default function DatasetPage() {
                     </Table>
                 </div>
 
-                <div className="p-4 bg-slate-900 border-t border-white/5 flex items-center justify-between">
+                <div className="p-4 bg-[#0a0f18]/80 border-t border-white/5 flex items-center justify-between">
                     <div className="font-mono text-[0.7rem] font-bold text-slate-500 uppercase tracking-widest pl-4">
                         Page {page} // {totalPages}
                     </div>
