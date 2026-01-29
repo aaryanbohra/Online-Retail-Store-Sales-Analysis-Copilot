@@ -1,48 +1,41 @@
-# Environment variables (contains API keys)
-.env
-.env.local
-.env.*.local
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-dist/
-build/
-eggs/
-*.egg
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Virtual environments
-venv/
-env/
-.venv/
+# testing
+/coverage
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
+# next.js
+/.next/
+/out/
 
-# Database - INCLUDE in repo for Streamlit Cloud deployment
-# (Streamlit Cloud doesn't persist files, so we need to commit the db)
+# production
+/build
 
-# Large CSV source files (not needed after database is created)
-online_retail*.csv
-
-# OS files
+# misc
 .DS_Store
-Thumbs.db
+*.pem
 
-# Logs
-*.log
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Claude Code settings
-.claude/
+# env files (can opt-in for committing if needed)
+.env*
 
-# Temporary files
-*.tmp
-*.temp
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
