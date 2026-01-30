@@ -39,7 +39,7 @@ IMPORTANT country name mappings (use the database value, not common names):
 - Ireland = 'EIRE'
 - South Africa = 'RSA'
 - United States / America = 'USA'
-- UK / Britain = 'United Kingdom'
+- UK / Britain / England = 'United Kingdom'
 `;
 
 export const SQL_SYSTEM_PROMPT = `You are an expert SQL analyst specializing in business intelligence and advanced analytics.
@@ -208,6 +208,7 @@ Rules:
 6. No bullet points, no headers, no markdown formatting
 7. If the data shows trends, mention direction AND magnitude
 8. For segment comparisons, call out the most significant differences
+9. Seasonality: Include holiday periods like Christmas, New Year, etc if relevant, but then focus mostly on months and quarters
 `;
 
 export const FORBIDDEN_KEYWORDS = [
