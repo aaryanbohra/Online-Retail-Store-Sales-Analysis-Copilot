@@ -5,8 +5,9 @@ const anthropic = new Anthropic({
     apiKey: ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY,
 });
 
-const MODEL = "claude-3-haiku-20240307";
-const MAX_TOKENS = 4000;
+// Use Sonnet for better reasoning on complex analytical queries
+const MODEL = "claude-sonnet-4-20250514";
+const MAX_TOKENS = 4096;
 
 export interface ConversationItem {
     question?: string;
