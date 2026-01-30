@@ -6,12 +6,12 @@ const globalForDb = global as unknown as { db: Pool };
 
 export const db = globalForDb.db || new Pool({
     connectionString: process.env.POSTGRES_URL,
-    ssl: process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: false }
-        : false,
+    ssl: {
+        rejectUnauthorized: false
+    },
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000,
 });
 
 if (process.env.NODE_ENV !== 'production') globalForDb.db = db;
