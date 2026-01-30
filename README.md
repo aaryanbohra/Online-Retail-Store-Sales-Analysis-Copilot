@@ -1,4 +1,6 @@
 # Analytics Copilot
+<a href="https://online-retail-store-sales-analysis.vercel.app/">
+  <img width="1311" height="579" alt="image" src="https://github.com/user-attachments/assets/97c420c7-5683-424d-b14f-354ccbe35ea7" />                                               </a>
 
 An intelligent analytics dashboard powered by Claude AI that transforms raw sales data into actionable business insights. Ask natural language questions about your sales data and get instant SQL queries with AI-generated insights.
 
