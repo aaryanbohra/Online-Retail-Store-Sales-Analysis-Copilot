@@ -3,17 +3,18 @@ import { sql } from '@/lib/postgres';
 
 export async function GET() {
     try {
-        const yearsRes = await sql`
-            SELECT DISTINCT TO_CHAR(invoice_date, 'YYYY') as year
-            FROM orders
-            ORDER BY year DESC
-        `;
-
-        const countriesRes = await sql`
-            SELECT DISTINCT country
-            FROM customers
-            ORDER BY country ASC
-        `;
+        const [yearsRes, countriesRes] = await Promise.all([
+            sql`
+                SELECT DISTINCT TO_CHAR(invoice_date, 'YYYY') as year
+                FROM orders
+                ORDER BY year DESC
+            `,
+            sql`
+                SELECT DISTINCT country
+                FROM customers
+                ORDER BY country ASC
+            `
+        ]);
 
         return NextResponse.json({
             years: yearsRes.map((r: any) => r.year),

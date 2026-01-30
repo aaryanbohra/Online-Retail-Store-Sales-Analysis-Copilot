@@ -1,11 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { ANTHROPIC_API_KEY, SQL_SYSTEM_PROMPT, INSIGHT_SYSTEM_PROMPT } from './constants';
+import { checkCostLimit, recordCost, getRemainingBudget } from './cost-tracker';
 
 const anthropic = new Anthropic({
     apiKey: ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY,
 });
 
-// Use Sonnet for better reasoning on complex analytical queries
+// Use Sonnet 4 for best reasoning on complex analytical queries
 const MODEL = "claude-sonnet-4-20250514";
 const MAX_TOKENS = 4096;
 
@@ -16,6 +17,11 @@ export interface ConversationItem {
 
 export class ClaudeService {
     static async generateSQL(question: string, context: ConversationItem[] = []): Promise<string> {
+        // Check cost limit before making request
+        if (!checkCostLimit()) {
+            throw new Error(`Daily API cost limit reached ($1.00). Remaining budget: $${getRemainingBudget().toFixed(2)}. Try again tomorrow.`);
+        }
+
         let userMessage = question;
         if (context && context.length > 0) {
             const contextStr = context.map(c => `Q: ${c.question}\nSQL: ${c.sql}`).join('\n\n');
@@ -31,13 +37,14 @@ export class ClaudeService {
                 messages: [{ role: 'user', content: userMessage }],
             });
 
+            // Record the cost
+            recordCost(response.usage.input_tokens, response.usage.output_tokens);
+
             // Extract text content
-            let text = '';
-            for (const block of response.content) {
-                if (block.type === 'text') {
-                    text += block.text;
-                }
-            }
+            const text = response.content
+                .filter(block => block.type === 'text')
+                .map(block => block.text)
+                .join('');
 
             // Formatting cleanup - remove markdown code blocks
             let sql = text.replace(/```sql/gi, '').replace(/```/g, '').trim();
@@ -56,6 +63,11 @@ export class ClaudeService {
     }
 
     static async generateInsight(question: string, data: any[], sql: string): Promise<string> {
+        // Check cost limit before making request
+        if (!checkCostLimit()) {
+            return `Daily API cost limit reached ($1.00). Remaining budget: $${getRemainingBudget().toFixed(2)}. Try again tomorrow.`;
+        }
+
         let resultsPreview = '';
         let dataNote = '';
 
@@ -88,12 +100,13 @@ Provide a business insight based on these results.
                 messages: [{ role: 'user', content: userMessage }],
             });
 
-            let text = '';
-            for (const block of response.content) {
-                if (block.type === 'text') {
-                    text += block.text;
-                }
-            }
+            // Record the cost
+            recordCost(response.usage.input_tokens, response.usage.output_tokens);
+
+            const text = response.content
+                .filter(block => block.type === 'text')
+                .map(block => block.text)
+                .join('');
             return text.trim();
         } catch (e: any) {
             return `Could not generate insight: ${e.message}`;

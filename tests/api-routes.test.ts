@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the database module
-vi.mock('@/lib/db', () => ({
-    db: {
-        query: vi.fn(),
+vi.mock('@/lib/postgres', () => ({
+    sql: {
+        unsafe: vi.fn(),
     },
 }));
 
@@ -15,7 +15,7 @@ vi.mock('@/lib/claude', () => ({
     },
 }));
 
-import { db } from '@/lib/db';
+import { sql } from '@/lib/postgres';
 import { ClaudeService } from '@/lib/claude';
 import { POST as generateSqlHandler } from '@/app/api/generate-sql/route';
 import { POST as executeQueryHandler } from '@/app/api/execute-query/route';
@@ -109,10 +109,7 @@ describe('API Routes', () => {
                 { country: 'UK', revenue: 500000 },
                 { country: 'Germany', revenue: 200000 },
             ];
-            vi.mocked(db.query).mockResolvedValue({
-                rows: mockRows,
-                fields: [{ name: 'country' }, { name: 'revenue' }],
-            } as any);
+            vi.mocked(sql.unsafe).mockResolvedValue(mockRows as any);
 
             const request = createMockRequest({
                 sql: 'SELECT country, SUM(revenue) as revenue FROM order_items GROUP BY country',
@@ -186,10 +183,7 @@ describe('API Routes', () => {
         });
 
         it('adds LIMIT to unlimited queries', async () => {
-            vi.mocked(db.query).mockResolvedValue({
-                rows: [{ id: 1 }],
-                fields: [{ name: 'id' }],
-            } as any);
+            vi.mocked(sql.unsafe).mockResolvedValue([{ id: 1 }] as any);
 
             const request = createMockRequest({
                 sql: 'SELECT * FROM orders',
@@ -197,14 +191,11 @@ describe('API Routes', () => {
 
             await executeQueryHandler(request);
 
-            expect(db.query).toHaveBeenCalledWith(expect.stringContaining('LIMIT 100'));
+            expect(sql.unsafe).toHaveBeenCalledWith(expect.stringContaining('LIMIT 100'));
         });
 
         it('preserves existing LIMIT', async () => {
-            vi.mocked(db.query).mockResolvedValue({
-                rows: [{ id: 1 }],
-                fields: [{ name: 'id' }],
-            } as any);
+            vi.mocked(sql.unsafe).mockResolvedValue([{ id: 1 }] as any);
 
             const request = createMockRequest({
                 sql: 'SELECT * FROM orders LIMIT 10',
@@ -212,11 +203,11 @@ describe('API Routes', () => {
 
             await executeQueryHandler(request);
 
-            expect(db.query).toHaveBeenCalledWith('SELECT * FROM orders LIMIT 10');
+            expect(sql.unsafe).toHaveBeenCalledWith('SELECT * FROM orders LIMIT 10');
         });
 
         it('returns 500 on database error', async () => {
-            vi.mocked(db.query).mockRejectedValue(new Error('Connection refused'));
+            vi.mocked(sql.unsafe).mockRejectedValue(new Error('Connection refused'));
 
             const request = createMockRequest({
                 sql: 'SELECT * FROM orders',
@@ -229,10 +220,8 @@ describe('API Routes', () => {
             expect(data.error).toBe('Connection refused');
         });
 
-        it('extracts columns from rows when fields not available', async () => {
-            vi.mocked(db.query).mockResolvedValue({
-                rows: [{ a: 1, b: 2, c: 3 }],
-            } as any);
+        it('extracts columns from rows', async () => {
+            vi.mocked(sql.unsafe).mockResolvedValue([{ a: 1, b: 2, c: 3 }] as any);
 
             const request = createMockRequest({
                 sql: 'SELECT a, b, c FROM test',

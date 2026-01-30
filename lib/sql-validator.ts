@@ -52,8 +52,6 @@ export class SQLValidator {
             return { isSafe: false, error: "Hex-encoded values not allowed" };
         }
 
-        // Postgres uses CHAR() but maybe we disallow it as dangerous-ish?
-        // Python code disallowed CHAR(.
         if (/\bCHAR\s*\(/.test(sqlUpper)) {
             return { isSafe: false, error: "CHAR() function not allowed" };
         }
