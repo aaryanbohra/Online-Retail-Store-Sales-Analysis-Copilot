@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { sql } from '@/lib/postgres';
 
 function isValidFilter(values: string[]): boolean {
   return values.length > 0 && values[0] !== '' && values[0] !== 'all';
@@ -202,33 +202,34 @@ export async function GET(request: Request): Promise<Response> {
             LIMIT 1
         `;
 
+    // Execute all queries in parallel
     const [
       kpiRes, trendRes, dayRes, hourRes,
       countryRes, productRes, priceRes,
       customerRes, freqRes
     ] = await Promise.all([
-      db.query(kpiQuery, values),
-      db.query(trendQuery, values),
-      db.query(dayQuery, values),
-      db.query(hourQuery, values),
-      db.query(countryQuery, values),
-      db.query(productQuery, values),
-      db.query(priceTierQuery, values),
-      db.query(customerQuery, values),
-      db.query(customerFrequencyQuery, values)
+      sql.unsafe(kpiQuery, values),
+      sql.unsafe(trendQuery, values),
+      sql.unsafe(dayQuery, values),
+      sql.unsafe(hourQuery, values),
+      sql.unsafe(countryQuery, values),
+      sql.unsafe(productQuery, values),
+      sql.unsafe(priceTierQuery, values),
+      sql.unsafe(customerQuery, values),
+      sql.unsafe(customerFrequencyQuery, values)
     ]);
 
     return NextResponse.json({
-      kpis: kpiRes.rows[0],
+      kpis: kpiRes[0],
       charts: {
-        revenueTrend: trendRes.rows,
-        revenueByDay: dayRes.rows,
-        revenueByHour: hourRes.rows,
-        countryRevenue: countryRes.rows,
-        topProducts: productRes.rows,
-        priceTiers: priceRes.rows,
-        topCustomers: customerRes.rows,
-        customerStats: freqRes.rows[0]
+        revenueTrend: trendRes,
+        revenueByDay: dayRes,
+        revenueByHour: hourRes,
+        countryRevenue: countryRes,
+        topProducts: productRes,
+        priceTiers: priceRes,
+        topCustomers: customerRes,
+        customerStats: freqRes[0]
       }
     });
 

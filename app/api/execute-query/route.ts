@@ -1,34 +1,32 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { sql } from '@/lib/postgres';
 import { SQLValidator } from '@/lib/sql-validator';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { sql } = body;
+        const { sql: sqlQuery } = body;
 
-        if (!sql) {
+        if (!sqlQuery) {
             return NextResponse.json({ error: 'SQL query is required' }, { status: 400 });
         }
 
-        const { isValid, error, sql: validatedSql } = SQLValidator.validate(sql);
+        const { isValid, error, sql: validatedSql } = SQLValidator.validate(sqlQuery);
 
         if (!isValid) {
             return NextResponse.json({ error: `Invalid SQL: ${error}` }, { status: 400 });
         }
 
-        const result = await db.query(validatedSql);
+        const result = await sql.unsafe(validatedSql);
 
-        // Extract column names from the first row or fields
+        // Extract column names from the first row
         let columns: string[] = [];
-        if (result.fields) {
-            columns = result.fields.map(f => f.name);
-        } else if (result.rows.length > 0) {
-            columns = Object.keys(result.rows[0]);
+        if (result.length > 0) {
+            columns = Object.keys(result[0]);
         }
 
         return NextResponse.json({
-            data: result.rows,
+            data: result,
             columns: columns
         });
     } catch (error: any) {
