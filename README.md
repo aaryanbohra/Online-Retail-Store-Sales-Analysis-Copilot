@@ -2,7 +2,7 @@
 
 An intelligent analytics dashboard powered by Claude AI that transforms raw sales data into actionable business insights. Ask natural language questions about your sales data and get instant SQL queries with AI-generated insights.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?logo=vercel&logoColor=white)](https://online-retail-store-sales-analysis-copilot.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?logo=vercel&logoColor=white)](https://online-retail-store-sales-analysis.vercel.app/)
 ![Next.js](https://img.shields.io/badge/Next.js-16.1-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)
@@ -10,7 +10,7 @@ An intelligent analytics dashboard powered by Claude AI that transforms raw sale
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**[Try the Live Demo](https://online-retail-store-sales-analysis-copilot.vercel.app/)** - Deployed on Vercel
+**[Try the Live Demo](https://online-retail-store-sales-analysis.vercel.app/)** - Deployed on Vercel
 
 ## Features
 
