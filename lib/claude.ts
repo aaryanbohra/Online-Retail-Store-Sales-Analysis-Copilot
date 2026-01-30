@@ -25,6 +25,7 @@ export class ClaudeService {
             const response = await anthropic.messages.create({
                 model: MODEL,
                 max_tokens: MAX_TOKENS,
+                temperature: 0,
                 system: SQL_SYSTEM_PROMPT,
                 messages: [{ role: 'user', content: userMessage }],
             });
@@ -81,6 +82,7 @@ Provide a business insight based on these results.
             const response = await anthropic.messages.create({
                 model: MODEL,
                 max_tokens: MAX_TOKENS,
+                temperature: 0,
                 system: INSIGHT_SYSTEM_PROMPT,
                 messages: [{ role: 'user', content: userMessage }],
             });

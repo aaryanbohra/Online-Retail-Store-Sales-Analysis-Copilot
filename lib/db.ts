@@ -6,9 +6,9 @@ const globalForDb = global as unknown as { db: Pool };
 
 export const db = globalForDb.db || new Pool({
     connectionString: process.env.POSTGRES_URL,
-    ssl: {
-        rejectUnauthorized: false // Supabase requires SSL, but often self-signed or needs CA; this is easiest for dev
-    },
+    ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,

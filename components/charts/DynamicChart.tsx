@@ -133,7 +133,7 @@ function renderPieChart(data: any[], keys: string[]): React.ReactElement {
 export function DynamicChart({ type, data, horizontal = false, height = 350 }: DynamicChartProps): React.ReactElement {
     if (!data || data.length === 0) {
         return (
-            <div className="flex items-center justify-center p-8 bg-slate-950/50 rounded-2xl border border-white/5 font-mono text-[0.7rem] text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center justify-center p-8 bg-[#0a0f18]/40 rounded-2xl border border-white/5 font-mono text-[0.7rem] text-slate-500 uppercase tracking-widest">
                 // NO_DATA_AVAILABLE
             </div>
         );
@@ -158,9 +158,9 @@ export function DynamicChart({ type, data, horizontal = false, height = 350 }: D
 
     if (type === 'table') {
         return (
-            <div className="border border-white/5 rounded-2xl overflow-hidden bg-slate-950/50">
+            <div className="border border-white/5 rounded-2xl overflow-hidden bg-[#0a0f18]/20">
                 <Table>
-                    <TableHeader className="bg-slate-900/50">
+                    <TableHeader className="bg-[#1e293b]/20">
                         <TableRow className="border-white/5">
                             {keys.map(k => <TableHead key={k} className="font-mono text-[0.65rem] text-amber-500 uppercase tracking-widest">{k}</TableHead>)}
                         </TableRow>
